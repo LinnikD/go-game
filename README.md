@@ -1,1 +1,7 @@
 # go-game
+
+
+
+```
+glide install
+```

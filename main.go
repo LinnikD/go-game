@@ -5,7 +5,7 @@ import (
 )
 
 func main () {
-	bot, err := tgbotapi.NewBotAPI("385402864:AAEmuWbihbSEVV7-8Jy0CDLSeLMcrPpI86s")
+	bot, _ := tgbotapi.NewBotAPI("385402864:AAEmuWbihbSEVV7-8Jy0CDLSeLMcrPpI86s")
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
@@ -17,7 +17,6 @@ func main () {
 			continue
 		} else {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Hi")
-			msg.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(msg)
 		}
