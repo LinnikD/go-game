@@ -1,0 +1,6 @@
+package goGame
+
+func main () {
+
+}
+
