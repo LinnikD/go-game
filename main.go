@@ -2,6 +2,7 @@ package main
 
 import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
+	"time"
 )
 
 func main () {
@@ -16,9 +17,13 @@ func main () {
 		if update.Message == nil {
 			continue
 		} else {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Hi")
-
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Heil")
 			bot.Send(msg)
+
+			time.AfterFunc(3 * time.Second, func() {
+				msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Bye")
+				bot.Send(msg)
+			})
 		}
 	}
 
