@@ -20,7 +20,8 @@ func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
 		bot: bot,
 		chatID: chatID,
 		words: make(map[string]struct{}),
-		users: make(map[*tgbotapi.User] int),
+		users_score: make(map[int] int),
+		users_names: make(map[int] string),
 		pattern: pattern,
 		checker: checker,
 	}
@@ -33,7 +34,8 @@ type Game struct {
 	bot      *tgbotapi.BotAPI
 	chatID   int64
 	words    map[string]struct{}
-	users    map[*tgbotapi.User] int
+	users_score    map[int] int
+	users_names    map[int] string
 	pattern  string
 	checker  *words.WordChecker
 }
@@ -51,12 +53,17 @@ func (g *Game) Turn(u tgbotapi.Update) {
 	}
 	if g.checker.CheckWordExists(message) {
 		g.words[message] = struct{}{}
-		if current_points, ok := g.users[u.Message.From]; ok {
+		if current_points, ok := g.users_score[u.Message.From.ID]; ok {
 			g.Send(fmt.Sprintf("%d\n", current_points))
-			g.users[u.Message.From] = current_points + 1
+			g.users_score[u.Message.From.ID] = current_points + 1
 		} else {
 			g.Send(fmt.Sprintf("%s\n", "new_user"))
-			g.users[u.Message.From] = 1
+			g.users_score[u.Message.From.ID] = 1
+			if u.Message.From.UserName != "" {
+				g.users_names[u.Message.From.ID] = u.Message.From.UserName
+			} else {
+				g.users_names[u.Message.From.ID] = u.Message.From.FirstName
+			}
 		}
 	} else {
 		g.Send("YOU LOOOOOSE (text is not correct)")
@@ -70,32 +77,21 @@ func (g *Game) Send(text string) {
 
 func (g *Game) ShowVictor() {
 	max_score := -1
-	if len(g.users) == 0 {
+	if len(g.users_score) == 0 {
 		g.Send("End! Wait... You didn't play with me :(((")
 		return
 	}
 
-	winner := tgbotapi.User{}
+	winner := ""
 	tableOfResult := "Scores table:\n"
-	for user, score := range g.users {
-		user_name := ""
-		if user.UserName != ""{
-			user_name = user.UserName
-		} else {
-			user_name = user.FirstName
-		}
+	for user_id, score := range g.users_score {
+		user_name := g.users_names[user_id]
 		tableOfResult = tableOfResult + fmt.Sprintf("%s: %d\n", user_name, score)
 		if score > max_score {
 			max_score = score
-			winner = *user
+			winner = user_name
 		}
 
 	}
-	winner_name := ""
-	if winner.UserName != "" {
-		winner_name = winner.UserName
-	} else {
-		winner_name = winner.FirstName
-	}
-	g.Send(fmt.Sprintf("End! And the winner is ... @%s!\n%s", winner_name, tableOfResult))
+	g.Send(fmt.Sprintf("End! And the winner is ... @%s!\n%s", winner, tableOfResult))
 }
