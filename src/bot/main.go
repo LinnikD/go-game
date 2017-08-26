@@ -40,7 +40,7 @@ func main () {
 			case update.Message.Text == "/start":
 				gameMap[chatID] = game.NewGame(bot, chatID)
 
-				gameTime := (5 + rand.Intn(5)) * time.Second
+				gameTime := time.Duration(rand.Intn(10 - 5) + 5) * time.Second
 
 				time.AfterFunc(gameTime, func() {
 					gameChanel <- chatID

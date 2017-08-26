@@ -15,6 +15,7 @@ type Game struct {
 	chatID int64
 	words map[string]struct{}
 	users map[*tgbotapi.User] int
+	//pattern string
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
