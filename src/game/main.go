@@ -53,10 +53,8 @@ func (g *Game) Turn(u tgbotapi.Update) {
 	if g.checker.CheckWordExists(message) {
 		g.words[message] = struct{}{}
 		if current_points, ok := g.users_score[u.Message.From.ID]; ok {
-			g.Send(fmt.Sprintf("%d\n", current_points))
 			g.users_score[u.Message.From.ID] = current_points + 1
 		} else {
-			g.Send(fmt.Sprintf("%s\n", "new_user"))
 			g.users_score[u.Message.From.ID] = 1
 			if u.Message.From.UserName != "" {
 				g.users_names[u.Message.From.ID] = u.Message.From.UserName
