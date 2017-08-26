@@ -1,33 +1,32 @@
 package game
 
 import (
-	tgbotapi "gopkg.in/telegram-bot-api.v4"
+	"gopkg.in/telegram-bot-api.v4"
 )
 
 func NewGame(bot *tgbotapi.BotAPI, chatID int64) (*Game) {
-	game := Game{bot, chatID, make(map[string]struct{}), make(map[tgbotapi.User] int)}
-	game.Send("Started!")
-	return &game
+	g := Game{bot, chatID, make(map[string]struct{}), make(map[*tgbotapi.User] int)}
+	g.Send("Started!")
+	return &g
 }
 
 type Game struct {
 	bot *tgbotapi.BotAPI
 	chatID int64
 	words map[string]struct{}
-	users map[tgbotapi.User] int
+	users map[*tgbotapi.User] int
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
 	message := u.Message.Text
-
 	if _, ok := g.words[message]; ok {
 		g.Send("YOU LOOOOOSE")
 	} else {
 		g.words[message] = struct {}{}
-		if current_points, ok := g.users[u.Message.from]; ok {
-			g.users[u.Message.from] = current_points + 1
+		if current_points, ok := g.users[u.Message.From]; ok {
+			g.users[u.Message.From] = current_points + 1
 		} else {
-			g.users[u.Message.from] = 1
+			g.users[u.Message.From] = 1
 		}
 	}
 }

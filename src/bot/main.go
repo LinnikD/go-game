@@ -1,10 +1,10 @@
 package main
 
 import (
-	tgbotapi "gopkg.in/telegram-bot-api.v4"
+	"gopkg.in/telegram-bot-api.v4"
 	"time"
 	"game"
-	"rand"
+	"math/rand"
 )
 
 func main () {
@@ -13,7 +13,7 @@ func main () {
 	u.Timeout = 1
 	updates, _ := bot.GetUpdatesChan(u)
 
-	gameMap := make(map[int64]*Game)
+	gameMap := make(map[int64]*game.Game)
 
 	gameChanel := make(chan int64)
 	go func() {
@@ -33,7 +33,7 @@ func main () {
 			case update.Message.Text == "/start":
 				gameMap[chatID] = game.NewGame(bot, chatID)
 
-				gameTime = (5 + rand.Intn(5)) * time.Second
+				gameTime := (5 + rand.Intn(5)) * time.Second
 
 				time.AfterFunc(gameTime, func() {
 					gameChanel <- chatID
