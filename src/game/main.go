@@ -76,12 +76,12 @@ func (g *Game) ShowVictor() {
 	tableOfResult := "Scores table:\n"
 	for user, score := range g.users {
 		user_name := ""
-		if user.UserName {
+		if user.UserName != ""{
 			user_name = user.UserName
 		} else {
 			user_name = user.FirstName
 		}
-		tableOfResult = tableOfResult + fmt.Sprintf("%s: &d\n", user_name, score)
+		tableOfResult = tableOfResult + fmt.Sprintf("%s: %d\n", user_name, score)
 		if score > max_score {
 			max_score = score
 			winner = *user
