@@ -10,7 +10,7 @@ import (
 )
 
 func main () {
-	cfg, err := config.LoadConfig("/Users/m.zubareva/Documents/goGame/go-game/src/config/config.yaml")
+	cfg, err := config.LoadConfig("/home/uzzz/go/go-game/src/config/config.yaml")
 	if err != nil {
 		log.Panicln("LoadConfig: ", err)
 	}
@@ -40,8 +40,8 @@ func main () {
 			case update.Message.Text == "/start":
 				gameMap[chatID] = game.NewGame(bot, chatID, &cfg)
 
-				gameTime := time.Duration(rand.Intn(100 - 90) + 90) * time.Second
-
+				gameTime := time.Duration(rand.Intn(20 - 5) + 5) * time.Second
+				gameTime = 10 * time.Second
 				time.AfterFunc(gameTime, func() {
 					gameChanel <- chatID
 				})
