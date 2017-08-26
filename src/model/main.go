@@ -6,6 +6,9 @@ import (
 	"log"
 )
 
+const DB_NAME = "go-game"
+const WORDS_COLLECTION = "words"
+
 type Word struct {
 	Text     string   `bson:"text,omitempty"`
 	IsWord   bool     `bson:"is_word,omitempty"`
@@ -23,14 +26,14 @@ func NewConnection(uri string) (*Connection) {
 		log.Panicln("MongoDB: ", err)
 	}
 
-	ensureIndex(session, "words",
+	ensureIndex(session, WORDS_COLLECTION,
 		[]string{"text"})
 
 	session.SetMode(mgo.Monotonic, true)
 
 	return &Connection{
 		session:       session,
-		words:         session.DB("go-game").C("words"),
+		words:         session.DB(DB_NAME).C(WORDS_COLLECTION),
 	}
 }
 
@@ -45,30 +48,22 @@ func (c *Connection) UpsertWord(word Word) {
 	}
 }
 
-func (c* Connection) GetWord() (text string) {
+func (c* Connection) GetWord(text string) (*Word) {
 	var word *Word
-	c.words.Find(bson.M{
-		"text": text, "channel_id": channelID,
-	}).One(&message)
+	c.words.Find(bson.M{"text": text}).One(&word)
 
-	if message == nil {
+	if word == nil {
 		return nil
+	} else {
+		return word
 	}
-
-	var channel *Channel
-	c.channel.Find(bson.M{
-		"chat.id": channelID,
-	}).One(&channel)
-	message.Channel = channel
-
-	return message
 }
 
 func ensureIndex(s *mgo.Session, table string, column []string) {
 	session := s.Copy()
 	defer session.Close()
 
-	c := session.DB("embed-telebot").C(table)
+	c := session.DB(DB_NAME).C(table)
 
 	index := mgo.Index{
 		Key:        column,

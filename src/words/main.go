@@ -1,31 +1,43 @@
 package words
 
 import (
-	"time"
 	"net/http"
 	"log"
+	"model"
+	"fmt"
 )
 
-type Word struct {
-	ID       int64    `bson:"channel_id,omitempty" json:"channel_id,omitempty"`
-	Text     string   `bson:"channel,omitempty" json:"channel,omitempty"`
-
+type WordChecker struct {
+	api      string
+	mongo    *model.Connection
 }
 
-func CheckWordExists(word string) {
-	for {
+func NewWordChecker(api string, mongo *model.Connection) (*WordChecker) {
+	checker := WordChecker{api, mongo}
+	return &checker
+}
 
-		// check mongo word
-		// if not ok check yandex
-		// write yandex result
-		// return
+func (c *WordChecker) CheckWordExists(text string) (bool) {
 
-		_, err := http.Get("http://example.com/")
-		if err != nil {
-			log.Printf("get words error: %s", err)
-		}
-		time.Sleep(time.Minute)
+	// check mongo word
+	word := c.mongo.GetWord(text)
+
+	if word != nil {
+		return word.IsWord
 	}
+
+	// if not ok check yandex
+	wordCheckUrl := fmt.Sprintf(c.api, text)
+	response, err := http.Get(wordCheckUrl)
+	if err != nil {
+		log.Printf("get words error: %s", err)
+	}
+
+	print(response)
+	// write yandex result
+
+	// return
+	return true
 }
 
 
