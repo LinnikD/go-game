@@ -18,7 +18,7 @@ func main () {
 	gameChanel := make(chan int64)
 	go func() {
 		for chatID := range gameChanel {
-			go gameMap[chatID].Send("End!")
+			go gameMap[chatID].ShowVictor()
 			delete(gameMap, chatID)
 		}
 	} ()
