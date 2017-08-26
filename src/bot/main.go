@@ -37,9 +37,10 @@ func main () {
 			chatID := update.Message.Chat.ID
 
 			switch {
-			case update.Message.Text == "/start":
+			case update.Message.Text == "/start" || update.Message.Text == "/start@versus_battle_bot":
 				if game_obj, ok := gameMap[chatID]; ok {
 					game_obj.Send("Батл уже идет!")
+					continue
 				}
 				gameMap[chatID] = game.NewGame(bot, chatID, &cfg)
 

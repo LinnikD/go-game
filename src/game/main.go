@@ -7,6 +7,7 @@ import (
 	"model"
 	"words"
 	"math/rand"
+	"strings"
 )
 
 func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
@@ -41,7 +42,7 @@ type Game struct {
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
-	message := u.Message.Text
+	message := strings.ToLower(u.Message.Text)
 	user_name := ""
 	if u.Message.From.UserName != "" {
 		user_name = u.Message.From.UserName
@@ -96,5 +97,5 @@ func (g *Game) ShowVictor() {
 		}
 
 	}
-	g.Send(fmt.Sprintf("Раунд! Лучщий репер сегодня: @%s!\n%s", winner, tableOfResult))
+	g.Send(fmt.Sprintf("Раунд! Лучший репер сегодня: @%s!\n%s", winner, tableOfResult))
 }
