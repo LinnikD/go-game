@@ -3,22 +3,37 @@ package game
 import (
 	"gopkg.in/telegram-bot-api.v4"
 	"fmt"
-	//"words"
+	"config"
+	"model"
+	"words"
 )
 
-func NewGame(bot *tgbotapi.BotAPI, chatID int64) (*Game) {
+func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
 	pattern := "ко"
-	g := Game{bot, chatID, make(map[string]struct{}), make(map[*tgbotapi.User] int), pattern}
+	mongo := model.NewConnection(cfg.Mongo)
+
+	checker := words.NewWordChecker(cfg.Yandex, mongo)
+
+	g := Game{
+		bot: bot,
+		chatID: chatID,
+		words: make(map[string]struct{}),
+		users: make(map[*tgbotapi.User] int),
+		pattern: pattern,
+		checker: checker,
+	}
+
 	g.Send("Started!")
 	return &g
 }
 
 type Game struct {
-	bot *tgbotapi.BotAPI
-	chatID int64
-	words map[string]struct{}
-	users map[*tgbotapi.User] int
-	pattern string
+	bot      *tgbotapi.BotAPI
+	chatID   int64
+	words    map[string]struct{}
+	users    map[*tgbotapi.User] int
+	pattern  string
+	checker  *words.WordChecker
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
@@ -29,17 +44,16 @@ func (g *Game) Turn(u tgbotapi.Update) {
 		if _, ok := g.words[message]; ok {
 			g.Send("YOU LOOOOOSE (text already was)")
 		} else {
-			//checker = words.NewWordChecker()
-			//if checker.CheckWordExists(message) {
-			g.words[message] = struct{}{}
-			if current_points, ok := g.users[u.Message.From]; ok {
-				g.users[u.Message.From] = current_points + 1
+			if g.checker.CheckWordExists(message) {
+				g.words[message] = struct{}{}
+				if current_points, ok := g.users[u.Message.From]; ok {
+					g.users[u.Message.From] = current_points + 1
+				} else {
+					g.users[u.Message.From] = 1
+				}
 			} else {
-				g.users[u.Message.From] = 1
+				g.Send("YOU LOOOOOSE (text is not correct)")
 			}
-			//} else {
-			//	g.Send("YOU LOOOOOSE (text is not correct)")
-			//}
 		}
 	}
 }
@@ -62,7 +76,7 @@ func (g *Game) ShowVictor() {
 		}
 	}
 	winner_name := ""
-	if winner.UserName {
+	if winner.UserName != "" {
 		winner_name = winner.UserName
 	}
 	g.Send(fmt.Sprintf("End! And the winner is ... @%s!", winner_name))
