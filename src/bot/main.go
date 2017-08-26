@@ -1,29 +1,30 @@
 package main
 
 import (
+	tgbotapi "gopkg.in/telegram-bot-api.v4"
 	"time"
-
-	"gopkg.in/telegram-bot-api.v4"
 )
 
-func newGame(bot *tgbotapi.BotAPI, chatID int64) *Game {
-	game := new(Game)
-	game.bot = bot
-	game.chatID = chatID
-	game.words = make(map[string]struct{})
+func newGame(bot *tgbotapi.BotAPI, chatID int64) (*Game) {
+	game := Game{bot, chatID, make(map[string]struct{})}
 	game.Send("Started!")
-	return game
+	return &game
 }
 
 type Game struct {
-	bot    *tgbotapi.BotAPI
+	bot *tgbotapi.BotAPI
 	chatID int64
-	words  map[string]struct{}
+	words map[string]struct{}
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
 	message := u.Message.Text
-	g.Send(message)
+
+	if _, ok := g.words[message]; ok {
+		g.Send("YOU LOOOOOSE")
+	} else {
+		g.words[message] = struct {}{}
+	}
 }
 
 func (g *Game) Send(text string) {
@@ -31,9 +32,8 @@ func (g *Game) Send(text string) {
 	g.bot.Send(msg)
 }
 
-func main() {
+func main () {
 	bot, _ := tgbotapi.NewBotAPI("385402864:AAEmuWbihbSEVV7-8Jy0CDLSeLMcrPpI86s")
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
 	updates, _ := bot.GetUpdatesChan(u)
@@ -44,8 +44,9 @@ func main() {
 	go func() {
 		for chatID := range gameChanel {
 			go gameMap[chatID].Send("End!")
+			delete(gameMap, chatID)
 		}
-	}()
+	} ()
 
 	for update := range updates {
 		if update.Message == nil {
@@ -56,17 +57,25 @@ func main() {
 			switch {
 			case update.Message.Text == "/start":
 				gameMap[chatID] = newGame(bot, chatID)
+
+				time.AfterFunc(15 * time.Second, func() {
+					gameChanel <- chatID
+				})
 			default:
-				gameMap[chatID].Turn(update)
+				if _, ok := gameMap[chatID]; ok {
+					gameMap[chatID].Turn(update)
+				} else {
+					msg := tgbotapi.NewMessage(chatID, "Pls start o/")
+					bot.Send(msg)
+				}
 			}
 
 			//msg := tgbotapi.NewMessage(ChatID, "Heil o/")
 			//bot.Send(msg)
 
-			time.AfterFunc(3*time.Second, func() {
-				gameChanel <- chatID
-			})
+
 		}
 	}
 
 }
+

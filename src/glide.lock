@@ -1,8 +1,15 @@
 hash: a1a86bc0b193f8469ffeb382be3b97772a256dd576348b24263d7ca74a554b21
-updated: 2017-08-26T13:00:14.314525323+03:00
+updated: 2017-08-26T13:59:01.191816787+03:00
 imports:
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
 - name: gopkg.in/telegram-bot-api.v4
   version: 0a57807db79efce7f6719fbb2c0e0f83fda79aec
 - name: gopkg.in/yaml.v2
