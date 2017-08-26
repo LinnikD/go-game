@@ -26,7 +26,7 @@ func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
 		checker: checker,
 	}
 
-	g.Send(fmt.Sprintf("You pattern is %s. Go!", g.pattern))
+	g.Send(fmt.Sprintf("Пошумим?\n Напиши больше всех слов начинающихся на: %s", g.pattern))
 	return &g
 }
 
@@ -76,12 +76,12 @@ func (g *Game) Send(text string) {
 func (g *Game) ShowVictor() {
 	max_score := -1
 	if len(g.users_score) == 0 {
-		g.Send("End! Wait... You didn't play with me :(((")
+		g.Send("Раунд! Стоп... Ты даже не батлился! Чо ты как Окси :(")
 		return
 	}
 
 	winner := ""
-	tableOfResult := "Scores table:\n"
+	tableOfResult := "Результаты:\n"
 	for user_id, score := range g.users_score {
 		user_name := g.users_names[user_id]
 		tableOfResult = tableOfResult + fmt.Sprintf("%s: %d\n", user_name, score)
@@ -91,5 +91,5 @@ func (g *Game) ShowVictor() {
 		}
 
 	}
-	g.Send(fmt.Sprintf("End! And the winner is ... @%s!\n%s", winner, tableOfResult))
+	g.Send(fmt.Sprintf("Раунд! Лучщий репер сегодня: @%s!\n%s", winner, tableOfResult))
 }

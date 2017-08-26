@@ -49,7 +49,7 @@ func main () {
 				if _, ok := gameMap[chatID]; ok {
 					gameMap[chatID].Turn(update)
 				} else {
-					msg := tgbotapi.NewMessage(chatID, "Pls send /start")
+					msg := tgbotapi.NewMessage(chatID, "Хочешь знать кто крче батлит? Жми /start")
 					bot.Send(msg)
 				}
 			}
