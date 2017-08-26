@@ -1,3 +1,0 @@
-package: github.com/LinnikD/go-game
-import:
-- package: gopkg.in/telegram-bot-api.v4
