@@ -38,6 +38,9 @@ func main () {
 
 			switch {
 			case update.Message.Text == "/start":
+				if game_obj, ok := gameMap[chatID]; ok {
+					game_obj.Send("Батл уже идет!")
+				}
 				gameMap[chatID] = game.NewGame(bot, chatID, &cfg)
 
 				gameTime := time.Duration(rand.Intn(30 - 10) + 10) * time.Second
