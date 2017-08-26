@@ -26,7 +26,7 @@ func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
 		checker: checker,
 	}
 
-	g.Send(fmt.Sprintf("Пошумим?\n Напиши больше всех слов начинающихся на: %s", g.pattern))
+	g.Send(fmt.Sprintf("Пошумим?\nНапиши больше всех слов начинающихся на: %s", g.pattern))
 	return &g
 }
 
@@ -49,11 +49,11 @@ func (g *Game) Turn(u tgbotapi.Update) {
 		user_name = u.Message.From.FirstName
 	}
 	if len(message) < len(g.pattern) || message[:4] != g.pattern {
-		g.Send(fmt.Sprintf("@%s LOOOOOSE (not by rules)", user_name))
+		g.Send(fmt.Sprintf("@%s Ломаешь правила? Не пойдет!", user_name))
 		return
 	}
 	if _, ok := g.words[message]; ok {
-		g.Send(fmt.Sprintf("@%s LOOOOOSE (text already was)", user_name))
+		g.Send(fmt.Sprintf("@%s Баян!", user_name))
 		return
 	}
 	if g.checker.CheckWordExists(message) {
@@ -69,7 +69,7 @@ func (g *Game) Turn(u tgbotapi.Update) {
 			}
 		}
 	} else {
-		g.Send(fmt.Sprintf("@%s LOOOOOSE (text is not correct)", user_name))
+		g.Send(fmt.Sprintf("@%s Ты слова то знаешь?", user_name))
 	}
 }
 

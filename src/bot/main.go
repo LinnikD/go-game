@@ -40,8 +40,7 @@ func main () {
 			case update.Message.Text == "/start":
 				gameMap[chatID] = game.NewGame(bot, chatID, &cfg)
 
-				gameTime := time.Duration(rand.Intn(20 - 5) + 5) * time.Second
-				gameTime = 10 * time.Second
+				gameTime := time.Duration(rand.Intn(30 - 10) + 10) * time.Second
 				time.AfterFunc(gameTime, func() {
 					gameChanel <- chatID
 				})
@@ -49,7 +48,7 @@ func main () {
 				if _, ok := gameMap[chatID]; ok {
 					gameMap[chatID].Turn(update)
 				} else {
-					msg := tgbotapi.NewMessage(chatID, "Хочешь знать кто крче батлит? Жми /start")
+					msg := tgbotapi.NewMessage(chatID, "Хочешь знать кто круче батлит? Жми /start")
 					bot.Send(msg)
 				}
 			}
