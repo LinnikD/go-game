@@ -6,10 +6,12 @@ import (
 	"config"
 	"model"
 	"words"
+	"math/rand"
 )
 
 func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
-	pattern := "ко"
+	patterns := [4]string{"ко", "ро", "ма", "зе"}
+	pattern := patterns[rand.Intn(4)]
 	mongo := model.NewConnection(cfg.Mongo)
 
 	checker := words.NewWordChecker(cfg.Yandex, mongo)
@@ -23,7 +25,7 @@ func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
 		checker: checker,
 	}
 
-	g.Send("Started!")
+	g.Send(fmt.Sprintf("You pattern is %s. Go!", g.pattern))
 	return &g
 }
 
@@ -43,21 +45,21 @@ func (g *Game) Turn(u tgbotapi.Update) {
 
 	if len(message) < len(g.pattern) || message[:4] != g.pattern {
 		g.Send("YOU LOOOOOSE (not by rules)")
-	} else {
-		if _, ok := g.words[message]; ok {
-			g.Send("YOU LOOOOOSE (text already was)")
+		return
+	}
+	if _, ok := g.words[message]; ok {
+		g.Send("YOU LOOOOOSE (text already was)")
+		return
+	}
+	if g.checker.CheckWordExists(message) {
+		g.words[message] = struct{}{}
+		if current_points, ok := g.users[u.Message.From]; ok {
+			g.users[u.Message.From] = current_points + 1
 		} else {
-			if g.checker.CheckWordExists(message) {
-				g.words[message] = struct{}{}
-				if current_points, ok := g.users[u.Message.From]; ok {
-					g.users[u.Message.From] = current_points + 1
-				} else {
-					g.users[u.Message.From] = 1
-				}
-			} else {
-				g.Send("YOU LOOOOOSE (text is not correct)")
-			}
+			g.users[u.Message.From] = 1
 		}
+	} else {
+		g.Send("YOU LOOOOOSE (text is not correct)")
 	}
 }
 
@@ -68,9 +70,11 @@ func (g *Game) Send(text string) {
 
 func (g *Game) ShowVictor() {
 	max_score := -1
-	if g.users == nil {
+	if len(g.users) == 0 {
 		g.Send("End! Wait... You didn't play with me :(((")
+		return
 	}
+
 	winner := tgbotapi.User{}
 	for user, score := range g.users {
 		if score > max_score {
@@ -81,6 +85,8 @@ func (g *Game) ShowVictor() {
 	winner_name := ""
 	if winner.UserName != "" {
 		winner_name = winner.UserName
+	} else {
+		winner_name = winner.FirstName
 	}
 	g.Send(fmt.Sprintf("End! And the winner is ... @%s!", winner_name))
 }
