@@ -5,6 +5,9 @@ import (
 	"log"
 	"model"
 	"fmt"
+	"io/ioutil"
+	"encoding/json"
+	"net/url"
 )
 
 type WordChecker struct {
@@ -27,17 +30,40 @@ func (c *WordChecker) CheckWordExists(text string) (bool) {
 	}
 
 	// if not ok check yandex
-	wordCheckUrl := fmt.Sprintf(c.api, text)
-	response, err := http.Get(wordCheckUrl)
-	if err != nil {
-		log.Printf("get words error: %s", err)
-	}
+	parameters := url.Values{}
+	parameters.Add("text", text)
+	p := parameters.Encode()
 
-	print(response)
+	wordCheckUrl := fmt.Sprintf(c.api, p)
+	response := apiRequest(wordCheckUrl)
+
 	// write yandex result
-
-	// return
-	return true
+	if len(response) > 0 {
+		c.mongo.UpsertWord(model.Word{text, false})
+		return true
+	} else {
+		c.mongo.UpsertWord(model.Word{text, true})
+		return false
+	}
 }
 
+func apiRequest(url string) ([]apiResponse) {
+	response, err := http.Get(url)
+	if err != nil {
+		log.Printf("%s", err)
+	}
 
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	respBody := make([]apiResponse,0)
+	err = json.Unmarshal(body, &respBody)
+
+	return respBody
+}
+
+type apiResponse struct {
+	Code int `json:"code,omitempty"`
+}

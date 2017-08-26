@@ -10,7 +10,7 @@ import (
 )
 
 func main () {
-	cfg, err := config.LoadConfig("/etc/bot/config.yaml")
+	cfg, err := config.LoadConfig("/home/uzzz/go/go-game/src/config/config.yaml")
 	if err != nil {
 		log.Panicln("LoadConfig: ", err)
 	}
