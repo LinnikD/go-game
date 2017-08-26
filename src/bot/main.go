@@ -5,10 +5,17 @@ import (
 	"time"
 	"game"
 	"math/rand"
+	"config"
+	"log"
 )
 
 func main () {
-	bot, _ := tgbotapi.NewBotAPI("385402864:AAEmuWbihbSEVV7-8Jy0CDLSeLMcrPpI86s")
+	cfg, err := config.LoadConfig("/etc/bot/config.yaml")
+	if err != nil {
+		log.Panicln("LoadConfig: ", err)
+	}
+
+	bot, _ := tgbotapi.NewBotAPI(cfg.Token)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
 	updates, _ := bot.GetUpdatesChan(u)

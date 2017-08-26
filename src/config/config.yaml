@@ -1,0 +1,3 @@
+token: 385402864:AAEmuWbihbSEVV7-8Jy0CDLSeLMcrPpI86s
+mongo: localhost:27017
+yandex: http://speller.yandex.net/services/spellservice.json/checkText?text=%s&options=32
