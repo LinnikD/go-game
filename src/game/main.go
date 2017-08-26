@@ -2,10 +2,13 @@ package game
 
 import (
 	"gopkg.in/telegram-bot-api.v4"
+	"fmt"
+	//"words"
 )
 
 func NewGame(bot *tgbotapi.BotAPI, chatID int64) (*Game) {
-	g := Game{bot, chatID, make(map[string]struct{}), make(map[*tgbotapi.User] int)}
+	pattern := "ко"
+	g := Game{bot, chatID, make(map[string]struct{}), make(map[*tgbotapi.User] int), pattern}
 	g.Send("Started!")
 	return &g
 }
@@ -15,19 +18,28 @@ type Game struct {
 	chatID int64
 	words map[string]struct{}
 	users map[*tgbotapi.User] int
-	//pattern string
+	pattern string
 }
 
 func (g *Game) Turn(u tgbotapi.Update) {
 	message := u.Message.Text
-	if _, ok := g.words[message]; ok {
-		g.Send("YOU LOOOOOSE")
+	if len(message) < len(g.pattern) || message[:4] != g.pattern {
+		g.Send("YOU LOOOOOSE (not by rules)")
 	} else {
-		g.words[message] = struct {}{}
-		if current_points, ok := g.users[u.Message.From]; ok {
-			g.users[u.Message.From] = current_points + 1
+		if _, ok := g.words[message]; ok {
+			g.Send("YOU LOOOOOSE (text already was)")
 		} else {
-			g.users[u.Message.From] = 1
+			//checker = words.NewWordChecker()
+			//if checker.CheckWordExists(message) {
+			g.words[message] = struct{}{}
+			if current_points, ok := g.users[u.Message.From]; ok {
+				g.users[u.Message.From] = current_points + 1
+			} else {
+				g.users[u.Message.From] = 1
+			}
+			//} else {
+			//	g.Send("YOU LOOOOOSE (text is not correct)")
+			//}
 		}
 	}
 }
@@ -35,4 +47,23 @@ func (g *Game) Turn(u tgbotapi.Update) {
 func (g *Game) Send(text string) {
 	msg := tgbotapi.NewMessage(g.chatID, text)
 	g.bot.Send(msg)
+}
+
+func (g *Game) ShowVictor() {
+	max_score := -1
+	if g.users == nil {
+		g.Send("End! Wait... You didn't play with me :(((")
+	}
+	winner := tgbotapi.User{}
+	for user, score := range g.users {
+		if score > max_score {
+			max_score = score
+			winner = *user
+		}
+	}
+	winner_name := ""
+	if winner.UserName {
+		winner_name = winner.UserName
+	}
+	g.Send(fmt.Sprintf("End! And the winner is ... @%s!", winner_name))
 }
