@@ -51,8 +51,10 @@ func (g *Game) Turn(u tgbotapi.Update) {
 	if g.checker.CheckWordExists(message) {
 		g.words[message] = struct{}{}
 		if current_points, ok := g.users[u.Message.From]; ok {
+			g.Send(fmt.Sprintf("%d\n", current_points))
 			g.users[u.Message.From] = current_points + 1
 		} else {
+			g.Send(fmt.Sprintf("%s\n", "new_user"))
 			g.users[u.Message.From] = 1
 		}
 	} else {
