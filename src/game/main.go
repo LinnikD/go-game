@@ -42,13 +42,18 @@ type Game struct {
 
 func (g *Game) Turn(u tgbotapi.Update) {
 	message := u.Message.Text
-
+	user_name := ""
+	if u.Message.From.UserName != "" {
+		user_name = u.Message.From.UserName
+	} else {
+		user_name = u.Message.From.FirstName
+	}
 	if len(message) < len(g.pattern) || message[:4] != g.pattern {
-		g.Send("YOU LOOOOOSE (not by rules)")
+		g.Send(fmt.Sprintf("@%s LOOOOOSE (not by rules)", user_name))
 		return
 	}
 	if _, ok := g.words[message]; ok {
-		g.Send("YOU LOOOOOSE (text already was)")
+		g.Send(fmt.Sprintf("@%s LOOOOOSE (text already was)", user_name))
 		return
 	}
 	if g.checker.CheckWordExists(message) {
@@ -64,7 +69,7 @@ func (g *Game) Turn(u tgbotapi.Update) {
 			}
 		}
 	} else {
-		g.Send("YOU LOOOOOSE (text is not correct)")
+		g.Send(fmt.Sprintf("@%s LOOOOOSE (text is not correct)", user_name))
 	}
 }
 
