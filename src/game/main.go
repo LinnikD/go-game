@@ -10,8 +10,8 @@ import (
 )
 
 func NewGame(bot *tgbotapi.BotAPI, chatID int64, cfg *config.Config) (*Game) {
-	patterns := [4]string{"ко", "ро", "ма", "зе"}
-	pattern := patterns[rand.Intn(4)]
+	patterns := [11]string{"ко", "ро", "ма", "зе", "ре", "ба", "ла", "да", "ди", "ли", "пр"}
+	pattern := patterns[rand.Intn(11)]
 	mongo := model.NewConnection(cfg.Mongo)
 
 	checker := words.NewWordChecker(cfg.Yandex, mongo)
@@ -74,11 +74,20 @@ func (g *Game) ShowVictor() {
 	}
 
 	winner := tgbotapi.User{}
+	tableOfResult := "Scores table:\n"
 	for user, score := range g.users {
+		user_name := ""
+		if user.UserName {
+			user_name = user.UserName
+		} else {
+			user_name = user.FirstName
+		}
+		tableOfResult = tableOfResult + fmt.Sprintf("%s: &d\n", user_name, score)
 		if score > max_score {
 			max_score = score
 			winner = *user
 		}
+
 	}
 	winner_name := ""
 	if winner.UserName != "" {
@@ -86,5 +95,5 @@ func (g *Game) ShowVictor() {
 	} else {
 		winner_name = winner.FirstName
 	}
-	g.Send(fmt.Sprintf("End! And the winner is ... @%s!", winner_name))
+	g.Send(fmt.Sprintf("End! And the winner is ... @%s!\n%s", winner_name, tableOfResult))
 }
