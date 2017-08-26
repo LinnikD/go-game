@@ -21,10 +21,8 @@ func NewWordChecker(api string, mongo *model.Connection) (*WordChecker) {
 }
 
 func (c *WordChecker) CheckWordExists(text string) (bool) {
-
 	// check mongo word
 	word := c.mongo.GetWord(text)
-
 	if word != nil {
 		return word.IsWord
 	}
@@ -40,15 +38,16 @@ func (c *WordChecker) CheckWordExists(text string) (bool) {
 	// write yandex result
 	if len(response) > 0 {
 		c.mongo.UpsertWord(model.Word{text, false})
-		return true
+		return false
 	} else {
 		c.mongo.UpsertWord(model.Word{text, true})
-		return false
+		return true
 	}
 }
 
 func apiRequest(url string) ([]apiResponse) {
 	response, err := http.Get(url)
+
 	if err != nil {
 		log.Printf("%s", err)
 	}

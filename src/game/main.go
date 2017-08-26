@@ -38,6 +38,9 @@ type Game struct {
 
 func (g *Game) Turn(u tgbotapi.Update) {
 	message := u.Message.Text
+
+	println(g.checker.CheckWordExists(message))
+
 	if len(message) < len(g.pattern) || message[:4] != g.pattern {
 		g.Send("YOU LOOOOOSE (not by rules)")
 	} else {
